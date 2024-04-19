@@ -1,0 +1,29 @@
+- hosts: rpi
+  name: Bootstrap machines by adding SSH user and modifying sudoers
+  tasks:
+    - name: Copy SSH Key
+      ansible.posix.authorized_key:
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+        user: omarqureshi
+      become: yes
+
+    - name: Create wheel group
+      ansible.builtin.group:
+        name: wheel
+      become: yes
+
+    - name: Add user to wheel group
+      ansible.builtin.user:
+        name: omarqureshi
+        groups:
+          - wheel
+      become: yes
+
+    - name: Validate the sudoers file before saving
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%WHEEL ALL='
+        line: '%WHEEL ALL=(ALL) NOPASSWD: ALL'
+        validate: /usr/sbin/visudo -cf %s
+      become: yes
