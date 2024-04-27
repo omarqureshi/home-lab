@@ -4,6 +4,7 @@
     ca_private_key_path: certs/qureshi_CA.local.key
     ca_certificate_path: certs/qureshi_CA.local.pem
     tls_private_key_path: certs/qureshi.local.key
+    tls_certificate_path: certs/qureshi.local.pem
   tasks:
     - name: Generate private key
       community.crypto.openssl_privatekey:
@@ -35,3 +36,38 @@
         privatekey_path: "{{ ca_private_key_path }}"
         provider: selfsigned
       when: not csr_file.stat.exists
+
+    - name: Generate TLS private key
+      community.crypto.openssl_privatekey:
+        path: "{{ tls_private_key_path }}"
+
+    - name: Does CSR file exist?
+      ansible.builtin.stat:
+        path: "{{ tls_certificate_path }}"
+      register: cert_file
+
+    - name: Create TLS CSR
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ tls_private_key_path }}"
+        subject_alt_name:
+          - "DNS: qureshi.local"
+          - "DNS: *.qureshi.local"
+      register: tls_csr
+      when: not cert_file.stat.exists
+
+    - name: Sign certificate with CA
+      community.crypto.x509_certificate_pipe:
+        csr_content: "{{ tls_csr.csr }}"
+        provider: ownca
+        ownca_path: "{{ ca_certificate_path }}"
+        ownca_privatekey_path: "{{ ca_private_key_path }}"
+        ownca_not_after: "+365d"
+        ownca_not_before: "-1d"
+      register: certificate
+      when: not cert_file.stat.exists
+
+    - name: Write certificate
+      ansible.builtin.copy:
+        dest: "{{ tls_certificate_path }}"
+        content: "{{ certificate.certificate }}"
+      when: not cert_file.stat.exists
