@@ -33,7 +33,7 @@
   notify:
     - Restart named
 
-- name: Create forward lookup zone
+- name: Create reverse lookup zone
   ansible.builtin.template:
     src: reverse.conf.local.j2
     dest: "/etc/bind/reverse.{{ dns_zone }}"
