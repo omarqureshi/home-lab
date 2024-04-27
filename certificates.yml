@@ -1,0 +1,37 @@
+- hosts: localhost
+  name: Create CA and self-signed certificates
+  vars:
+    ca_private_key_path: certs/qureshi_CA.local.key
+    ca_certificate_path: certs/qureshi_CA.local.pem
+    tls_private_key_path: certs/qureshi.local.key
+  tasks:
+    - name: Generate private key
+      community.crypto.openssl_privatekey:
+        path: "{{ ca_private_key_path }}"
+
+    - name: Does CSR file exist?
+      ansible.builtin.stat:
+        path: "{{ ca_certificate_path }}"
+      register: csr_file
+
+    - name: Create CSR
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: "{{ ca_private_key_path }}"
+        common_name: "Qureshi CA"
+        use_common_name_for_san: no
+        basic_constraints:
+          - "CA:TRUE"
+        basic_constraints_critical: yes
+        key_usage:
+          - keyCertSign
+        key_usage_critical: yes
+      register: ca_csr
+      when: not csr_file.stat.exists
+
+    - name: Create self signed CA certificate
+      community.crypto.x509_certificate:
+        path: "{{ ca_certificate_path }}"
+        csr_content: "{{ ca_csr.csr }}"
+        privatekey_path: "{{ ca_private_key_path }}"
+        provider: selfsigned
+      when: not csr_file.stat.exists
