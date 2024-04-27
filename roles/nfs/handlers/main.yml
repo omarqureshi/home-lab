@@ -1,0 +1,12 @@
+---
+# handlers file for nfs
+- name: Restart NFS
+  ansible.builtin.systemd:
+    daemon_reload: yes
+    state: restarted
+    name: nfs-kernel-server.service
+  become: yes
+
+- name: Re-export
+  ansible.builtin.command: exportfs -rav
+  become: yes

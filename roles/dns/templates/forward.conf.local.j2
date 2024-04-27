@@ -1,0 +1,22 @@
+$TTL {{ dns_global_ttl }}
+@ IN SOA primary.{{ dns_zone }}. root.primary.{{ dns_zone }}. (
+         {{ ansible_date_time.epoch }} ; Serial
+         3600 ; Refresh
+         1800 ; Retry
+         604800 ; Expire
+         {{ dns_negative_cache_ttl }} ) ; Negative Cache TTL
+;Name Server Information
+@ IN NS primary.{{ dns_zone }}.
+
+;IP address of Your Domain Name Server(DNS)
+primary IN A {{ dns_primary }}
+
+;A Record for Host names
+{% for record in dns_records.a.items() %}
+{{ record[0] }} IN A {{ record[1] }}
+{% endfor %}
+
+;CNAME Record
+{% for record in dns_records.cname.items() %}
+{{ record[0] }} IN CNAME {{ record[1] }}.
+{% endfor %}

@@ -1,4 +1,4 @@
-- hosts: rpi
+- hosts: all
   name: Bootstrap machines by adding SSH user and modifying sudoers
   tasks:
     - name: Copy SSH Key
@@ -23,7 +23,7 @@
       ansible.builtin.lineinfile:
         path: /etc/sudoers
         state: present
-        regexp: '^%WHEEL ALL='
-        line: '%WHEEL ALL=(ALL) NOPASSWD: ALL'
+        regexp: '^%wheel ALL='
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
         validate: /usr/sbin/visudo -cf %s
       become: yes

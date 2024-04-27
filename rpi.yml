@@ -1,12 +1,7 @@
 - hosts: rpi
   name: Set up Kubernetes on the cluster
   tasks:
-    - name: Update all packages for the operating system
-      ansible.builtin.apt:
-        name: "*"
-        state: latest
-      become: yes
-      
+    - ansible.builtin.include_tasks: "tasks/update.yml"
     - name: Add cgroup flags
       ansible.builtin.lineinfile:
         path: /boot/firmware/cmdline.txt

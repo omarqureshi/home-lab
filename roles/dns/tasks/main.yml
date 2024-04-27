@@ -1,0 +1,49 @@
+---
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - bind9
+      - bind9utils
+      - bind9-doc
+      - dnsutils
+    state: latest
+  become: yes
+
+- name: Create options file
+  ansible.builtin.template:
+    src: named.conf.options.j2
+    dest: "/etc/bind/named.conf.options"
+  become: yes
+  notify:
+    - Restart named
+
+- name: Create zone file
+  ansible.builtin.template:
+    src: named.conf.local.j2
+    dest: "/etc/bind/named.conf.local"
+  become: yes
+  notify:
+    - Restart named
+
+- name: Create forward lookup zone
+  ansible.builtin.template:
+    src: forward.conf.local.j2
+    dest: "/etc/bind/forward.{{ dns_zone }}"
+  become: yes
+  notify:
+    - Restart named
+
+- name: Create forward lookup zone
+  ansible.builtin.template:
+    src: reverse.conf.local.j2
+    dest: "/etc/bind/reverse.{{ dns_zone }}"
+  become: yes
+  notify:
+    - Restart named
+
+- name: Set port binding options
+  ansible.builtin.lineinfile:
+    path: "/etc/default/named"
+    regexp: "^OPTIONS"
+    line: OPTIONS="-u bind -4"
+  become: yes

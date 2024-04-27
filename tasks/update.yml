@@ -1,0 +1,5 @@
+- name: Update all packages for the operating system
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+  become: yes

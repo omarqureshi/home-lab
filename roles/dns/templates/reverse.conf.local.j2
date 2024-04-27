@@ -1,0 +1,17 @@
+$TTL {{ dns_global_ttl }}
+@ IN SOA {{ dns_zone }}. root.{{ dns_zone }}. (
+         {{ ansible_date_time.epoch }} ;Serial
+         3600 ;Refresh
+         1800 ;Retry
+         604800 ;Expire
+         {{ dns_global_ttl }} ;Minimum TTL
+)
+;Your Name Server Info
+@ IN NS primary.{{ dns_zone }}.
+primary IN A {{ dns_primary }}
+;Reverse Lookup for Your DNS Server
+{{ dns_primary | split(".") | last }} IN PTR primary.{{ dns_zone }}.
+;PTR Record IP address to HostName
+{% for record in dns_records.a.items() %}
+{{ record[1] | split(".") | last }} IN PTR {{ record[0] }}.{{ dns_zone }}.
+{% endfor %}

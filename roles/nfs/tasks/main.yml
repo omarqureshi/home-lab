@@ -1,0 +1,28 @@
+---
+- name: Install packages
+  ansible.builtin.apt:
+    name: nfs-kernel-server
+    state: latest
+  become: yes
+  notify:
+    - Restart NFS
+    - Re-export
+
+- name: Ensure volume exists
+  ansible.builtin.file:
+    path: /mnt/nfs-export
+    state: directory
+    mode: 0777
+  become: yes
+
+- name: Ensure required entries are made to hosts file.
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    state: present
+    line: "{{ item }}"
+  with_items:
+    - '/mnt/nfs-export  *(rw,no_root_squash,no_subtree_check,insecure)'
+  notify:
+    - Restart NFS
+    - Re-export
+  become: yes

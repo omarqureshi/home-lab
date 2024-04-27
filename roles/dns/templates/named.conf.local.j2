@@ -1,0 +1,11 @@
+zone "{{ dns_zone }}" IN {
+      type master;
+      file "/etc/bind/forward.{{ dns_zone }}";
+      allow-update { none; };
+};
+
+zone "{{ dns_subnet | split('/') | first | split('.') | reverse | join('.') }}.in-addr.arpa" IN {
+      type master;
+      file "/etc/bind/forward.{{ dns_zone }}";
+      allow-update { none; };
+};

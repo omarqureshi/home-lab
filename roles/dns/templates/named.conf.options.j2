@@ -1,0 +1,12 @@
+acl internal-network {
+        {{ dns_subnet }};
+};
+options {
+        directory "/var/cache/bind";
+        allow-query { localhost; internal-network; };
+        allow-transfer { localhost; };
+        forwarders { {{ dns_forwarders | join("; ") }}; };
+        recursion yes;
+        dnssec-validation auto;
+        listen-on-v6 { any; };
+};
