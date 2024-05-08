@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quake-live
+  labels:
+    app: quake-live
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quake-live
+  template:
+    metadata:
+      labels:
+        app: quake-live
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "kubernetes.io/arch"
+                    operator: In
+                    values: ["amd64"]
+      containers:
+      - name: quake-live
+        image: quakeliveserverstandards/duel
+        ports:
+        - containerPort: 27960
+          protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quake-live
+spec:
+  selector:
+    app: quake-live
+  type: LoadBalancer
+  ports:
+    - port: 27960
+      targetPort: 27960
+      protocol: UDP

@@ -12,10 +12,22 @@
         node-a: 192.168.1.101
         node-b: 192.168.1.102
         node-c: 192.168.1.103
+        www: 192.168.1.150
       cname:
         master: node_a.qureshi.local
   pre_tasks:
     - ansible.builtin.include_tasks: "tasks/update.yml"
+    - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+      ansible.builtin.shell: |
+        swapoff -a
+      become: yes
+    - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+      become: yes
   roles:
     - nfs
     - dns
+    - kubeadm

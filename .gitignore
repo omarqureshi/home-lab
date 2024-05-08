@@ -5,5 +5,6 @@ tmp/
 
 certs/qureshi_CA.local.pem
 certs/qureshi_CA.local.key
+certs/qureshi_CA.local.crt
 certs/qureshi.local.pem
 certs/qureshi.local.key

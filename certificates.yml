@@ -49,8 +49,10 @@
     - name: Create TLS CSR
       community.crypto.openssl_csr_pipe:
         privatekey_path: "{{ tls_private_key_path }}"
+        common_name: "qureshi.local"
+        subject:
+          CN: "*.qureshi.local"
         subject_alt_name:
-          - "DNS: qureshi.local"
           - "DNS: *.qureshi.local"
       register: tls_csr
       when: not cert_file.stat.exists
